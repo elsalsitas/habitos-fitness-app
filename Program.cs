@@ -23,9 +23,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
-
-// Configurar Reports como página por defecto
 app.MapRazorPages();
-app.MapGet("/", () => Results.Redirect("/Reports"));
 
 app.Run();

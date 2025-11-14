@@ -6,9 +6,11 @@ namespace MongoDBReports.Services
     public class MongoDBService
     {
         private readonly IMongoCollection<HabitoFitness> _habitosCollection;
+        private readonly ILogger<MongoDBService> _logger;
 
-        public MongoDBService()
+        public MongoDBService(ILogger<MongoDBService> logger)
         {
+            _logger = logger;
             try 
             {
                 // Connection string sin SSL para Railway
@@ -17,12 +19,14 @@ namespace MongoDBReports.Services
                 var database = client.GetDatabase("ReportsDB");
                 _habitosCollection = database.GetCollection<HabitoFitness>("habitos_fitness");
                 
-                // Crear datos de ejemplo de forma ASINCRONA (no bloquear el inicio)
+                _logger.LogInformation("MongoDB Service inicializado correctamente");
+                
+                // Crear datos de ejemplo de forma ASINCRONA
                 _ = Task.Run(async () => await CreateSampleDataAsync());
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error en constructor MongoDB: {ex.Message}");
+                _logger.LogError(ex, "Error inicializando MongoDB Service");
             }
         }
 
@@ -41,16 +45,17 @@ namespace MongoDBReports.Services
                             DuracionMinutos = 30,
                             CaloriasQuemadas = 300,
                             Fecha = DateTime.UtcNow.AddDays(-1),
-                            Intensidad = "Alta"
+                            Intensidad = "Alta",
+                            Notas = "Datos de ejemplo"
                         }
                     };
                     await _habitosCollection.InsertManyAsync(sampleHabitos);
-                    Console.WriteLine("Datos de ejemplo creados exitosamente");
+                    _logger.LogInformation("Datos de ejemplo creados exitosamente");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error creando datos: {ex.Message}");
+                _logger.LogError(ex, "Error creando datos de ejemplo");
             }
         }
 
@@ -62,7 +67,7 @@ namespace MongoDBReports.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error obteniendo hábitos: {ex.Message}");
+                _logger.LogError(ex, "Error obteniendo hábitos");
                 // Devolver datos de ejemplo si hay error de conexión
                 return new List<HabitoFitness>
                 {
@@ -72,7 +77,8 @@ namespace MongoDBReports.Services
                         DuracionMinutos = 30,
                         CaloriasQuemadas = 300,
                         Fecha = DateTime.UtcNow.AddDays(-1),
-                        Intensidad = "Alta"
+                        Intensidad = "Alta",
+                        Notas = "Datos de ejemplo por fallo de conexión"
                     }
                 };
             }
@@ -83,11 +89,12 @@ namespace MongoDBReports.Services
             try 
             {
                 await _habitosCollection.InsertOneAsync(habito);
+                _logger.LogInformation("Hábito creado exitosamente: {Actividad}", habito.Actividad);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error creando hábito: {ex.Message}");
-                throw;
+                _logger.LogError(ex, "Error creando hábito: {Actividad}", habito.Actividad);
+                throw new Exception($"No se pudo crear el hábito: {ex.Message}");
             }
         }
 
@@ -96,11 +103,12 @@ namespace MongoDBReports.Services
             try 
             {
                 await _habitosCollection.DeleteOneAsync(x => x.Id == id);
+                _logger.LogInformation("Hábito eliminado: {Id}", id);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error eliminando hábito: {ex.Message}");
-                throw;
+                _logger.LogError(ex, "Error eliminando hábito: {Id}", id);
+                throw new Exception($"No se pudo eliminar el hábito: {ex.Message}");
             }
         }
     }

@@ -10,6 +10,10 @@ builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 builder.Services.AddRazorPages();
 builder.Services.AddSingleton<MongoDBService>();
 
+// Mejor logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

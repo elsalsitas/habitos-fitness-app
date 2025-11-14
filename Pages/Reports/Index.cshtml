@@ -1,0 +1,230 @@
+﻿@page
+@model MongoDBReports.Pages.Reports.IndexModel
+@{
+    ViewData["Title"] = "Seguimiento de Hábitos Fitness";
+}
+
+<div class="container mt-4">
+    <h1><i class="fas fa-dumbbell"></i> Seguimiento de Hábitos Fitness</h1>
+    <p class="text-muted">Monitorea tu progreso fitness y mantén tus hábitos saludables</p>
+
+    <!-- Tarjetas de Estadísticas Fitness -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Total Sesiones</h5>
+                    <h2>@Model.TotalHabitos</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Calorías Quemadas</h5>
+                    <h2>@Model.TotalCalorias</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Minutos de Ejercicio</h5>
+                    <h2>@Model.TotalMinutos</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">Última Actividad</h5>
+                    <h6>@Model.UltimaActividad</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-filter"></i> Filtros de Actividades</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="search" class="form-label">Buscar actividad:</label>
+                    <input type="text" class="form-control" id="search" name="search" value="@Model.SearchTerm" placeholder="Ej: running, yoga...">
+                </div>
+                <div class="col-md-3">
+                    <label for="tipo" class="form-label">Tipo de ejercicio:</label>
+                    <select class="form-select" id="tipo" name="tipo">
+                        <option value="">Todos los tipos</option>
+                        <option value="Cardio" selected="@(Model.TipoSeleccionado == "Cardio")">Cardio</option>
+                        <option value="Fuerza" selected="@(Model.TipoSeleccionado == "Fuerza")">Fuerza</option>
+                        <option value="Flexibilidad" selected="@(Model.TipoSeleccionado == "Flexibilidad")">Flexibilidad</option>
+                        <option value="Crossfit" selected="@(Model.TipoSeleccionado == "Crossfit")">Crossfit</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="intensidad" class="form-label">Intensidad:</label>
+                    <select class="form-select" id="intensidad" name="intensidad">
+                        <option value="">Todas</option>
+                        <option value="Baja" selected="@(Model.IntensidadSeleccionada == "Baja")">Baja</option>
+                        <option value="Moderada" selected="@(Model.IntensidadSeleccionada == "Moderada")">Moderada</option>
+                        <option value="Alta" selected="@(Model.IntensidadSeleccionada == "Alta")">Alta</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search"></i> Filtrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Formulario para agregar nuevo hábito -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-plus-circle"></i> Registrar Nueva Actividad</h5>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" name="actividad" placeholder="Actividad (Ej: Running)" required>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" name="tipo" required>
+                            <option value="">Tipo</option>
+                            <option value="Cardio">Cardio</option>
+                            <option value="Fuerza">Fuerza</option>
+                            <option value="Flexibilidad">Flexibilidad</option>
+                            <option value="Crossfit">Crossfit</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" class="form-control" name="duracion" placeholder="Duración (min)" required>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" class="form-control" name="calorias" placeholder="Calorías" required>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" name="intensidad" required>
+                            <option value="Baja">Baja</option>
+                            <option value="Moderada" selected>Moderada</option>
+                            <option value="Alta">Alta</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-success w-100" title="Agregar"><i class="fas fa-save"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Hábitos Fitness -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-list"></i> Historial de Actividades (@Model.Habitos.Count registros)</h5>
+            <span class="badge bg-primary">Base de datos: MongoDB Atlas</span>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Habitos.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Actividad</th>
+                                <th>Tipo</th>
+                                <th>Duración</th>
+                                <th>Calorías</th>
+                                <th>Intensidad</th>
+                                <th>Fecha</th>
+                                <th>Notas</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var habito in Model.Habitos)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@habito.Actividad</strong>
+                                    </td>
+                                    <td>
+                                        @{
+                                            var badgeClass = habito.Tipo switch
+                                            {
+                                                "Cardio" => "bg-danger",
+                                                "Fuerza" => "bg-primary",
+                                                "Flexibilidad" => "bg-success",
+                                                "Crossfit" => "bg-warning",
+                                                _ => "bg-secondary"
+                                            };
+                                        }
+                                        <span class="badge @badgeClass">@habito.Tipo</span>
+                                    </td>
+                                    <td>@habito.DuracionMinutos min</td>
+                                    <td>
+                                        <span class="badge bg-dark">@habito.CaloriasQuemadas cal</span>
+                                    </td>
+                                    <td>
+                                        @{
+                                            var intensidadClass = habito.Intensidad switch
+                                            {
+                                                "Alta" => "bg-danger",
+                                                "Moderada" => "bg-warning",
+                                                "Baja" => "bg-info",
+                                                _ => "bg-secondary"
+                                            };
+                                        }
+                                        <span class="badge @intensidadClass">@habito.Intensidad</span>
+                                    </td>
+                                    <td>
+                                        <small>@habito.Fecha.ToString("dd/MM/yyyy")</small>
+                                        <br>
+                                        <small class="text-muted">@habito.Fecha.ToString("HH:mm")</small>
+                                    </td>
+                                    <td>
+                                        <small>@habito.Notas</small>
+                                    </td>
+                                    <td>
+                                        <form method="post" asp-page-handler="Delete" asp-route-id="@habito.Id" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                    onclick="return confirm('¿Eliminar esta actividad?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <i class="fas fa-running fa-3x text-muted mb-3"></i>
+                    <h5>No hay actividades registradas</h5>
+                    <p class="text-muted">@(string.IsNullOrEmpty(Model.SearchTerm) ? "Comienza agregando tu primera actividad!" : "No hay actividades que coincidan con tu búsqueda.")</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-focus en el campo de búsqueda
+        document.getElementById('search')?.focus();
+        
+        // Mostrar notificación de éxito
+        if (window.location.search.includes('created=true')) {
+            setTimeout(() => {
+                alert('✅ Actividad registrada exitosamente!');
+            }, 100);
+        }
+    </script>
+}

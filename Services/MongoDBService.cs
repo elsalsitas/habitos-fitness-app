@@ -13,15 +13,14 @@ namespace MongoDBReports.Services
             _logger = logger;
             try 
             {
-                // Connection string sin SSL para Railway
                 var connectionString = "mongodb+srv://damianvm:damian123@cluster0.9i09lhe.mongodb.net/ReportsDB?retryWrites=true&w=majority&tls=false&ssl=false";
                 var client = new MongoClient(connectionString);
                 var database = client.GetDatabase("ReportsDB");
                 _habitosCollection = database.GetCollection<HabitoFitness>("habitos_fitness");
                 
-                _logger.LogInformation("MongoDB Service inicializado correctamente");
+                _logger.LogInformation("MongoDB Service inicializado");
                 
-                // Crear datos de ejemplo de forma ASINCRONA
+                // Crear datos de ejemplo de forma asincrona
                 _ = Task.Run(async () => await CreateSampleDataAsync());
             }
             catch (Exception ex)
@@ -50,7 +49,7 @@ namespace MongoDBReports.Services
                         }
                     };
                     await _habitosCollection.InsertManyAsync(sampleHabitos);
-                    _logger.LogInformation("Datos de ejemplo creados exitosamente");
+                    _logger.LogInformation("Datos de ejemplo creados");
                 }
             }
             catch (Exception ex)
@@ -68,16 +67,15 @@ namespace MongoDBReports.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error obteniendo hábitos");
-                // Devolver datos de ejemplo si hay error de conexión
                 return new List<HabitoFitness>
                 {
                     new HabitoFitness { 
-                        Actividad = "Ejemplo - Running", 
+                        Actividad = "Ejemplo - Conexión falló", 
                         Tipo = "Cardio",
                         DuracionMinutos = 30,
                         CaloriasQuemadas = 300,
-                        Fecha = DateTime.UtcNow.AddDays(-1),
-                        Intensidad = "Alta",
+                        Fecha = DateTime.UtcNow,
+                        Intensidad = "Moderada",
                         Notas = "Datos de ejemplo por fallo de conexión"
                     }
                 };
@@ -89,7 +87,7 @@ namespace MongoDBReports.Services
             try 
             {
                 await _habitosCollection.InsertOneAsync(habito);
-                _logger.LogInformation("Hábito creado exitosamente: {Actividad}", habito.Actividad);
+                _logger.LogInformation("Hábito creado: {Actividad}", habito.Actividad);
             }
             catch (Exception ex)
             {

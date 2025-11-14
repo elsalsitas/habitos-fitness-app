@@ -1,12 +1,7 @@
 ﻿bin/
 obj/
 .git/
-.gitignore
-README.md
 .vs/
 .DS_Store
 *.user
 *.bak
-Dockerfile*
-.dockerignore
-*.sln

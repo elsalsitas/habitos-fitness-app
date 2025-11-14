@@ -1,12 +1,18 @@
 ﻿bin/
 obj/
 .git/
+<<<<<<< HEAD
 .gitignore
 README.md
+=======
+>>>>>>> b3dc4eb5a80c843991550a63cfe6cb986971b2e9
 .vs/
 .DS_Store
 *.user
 *.bak
+<<<<<<< HEAD
 Dockerfile*
 .dockerignore
 *.sln
+=======
+>>>>>>> b3dc4eb5a80c843991550a63cfe6cb986971b2e9

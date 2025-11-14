@@ -8,6 +8,23 @@
     <h1><i class="fas fa-dumbbell"></i> Seguimiento de Hábitos Fitness</h1>
     <p class="text-muted">Monitorea tu progreso fitness y mantén tus hábitos saludables</p>
 
+    <!-- Mensajes de éxito/error -->
+    @if (!string.IsNullOrEmpty(Model.MensajeExito))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @Model.MensajeExito
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.MensajeError))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @Model.MensajeError
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
     <!-- Tarjetas de Estadísticas Fitness -->
     <div class="row mb-4">
         <div class="col-md-3">
@@ -90,22 +107,22 @@
             <form method="post">
                 <div class="row g-3">
                     <div class="col-md-3">
-                        <input type="text" class="form-control" name="actividad" placeholder="Actividad (Ej: Running)" required>
+                        <input type="text" class="form-control" name="actividad" placeholder="Actividad (Ej: Running)" required value="Running Test">
                     </div>
                     <div class="col-md-2">
                         <select class="form-select" name="tipo" required>
                             <option value="">Tipo</option>
-                            <option value="Cardio">Cardio</option>
+                            <option value="Cardio" selected>Cardio</option>
                             <option value="Fuerza">Fuerza</option>
                             <option value="Flexibilidad">Flexibilidad</option>
                             <option value="Crossfit">Crossfit</option>
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <input type="number" class="form-control" name="duracion" placeholder="Duración (min)" required>
+                        <input type="number" class="form-control" name="duracion" placeholder="Duración (min)" required value="30">
                     </div>
                     <div class="col-md-2">
-                        <input type="number" class="form-control" name="calorias" placeholder="Calorías" required>
+                        <input type="number" class="form-control" name="calorias" placeholder="Calorías" required value="300">
                     </div>
                     <div class="col-md-2">
                         <select class="form-select" name="intensidad" required>
@@ -115,8 +132,13 @@
                         </select>
                     </div>
                     <div class="col-md-1">
-                        <button type="submit" class="btn btn-success w-100" title="Agregar"><i class="fas fa-save"></i></button>
+                        <button type="submit" class="btn btn-success w-100" title="Agregar">
+                            <i class="fas fa-save"></i>
+                        </button>
                     </div>
+                </div>
+                <div class="mt-2">
+                    <small class="text-muted">Debug: Los campos tienen valores por defecto para testing</small>
                 </div>
             </form>
         </div>
@@ -220,11 +242,10 @@
         // Auto-focus en el campo de búsqueda
         document.getElementById('search')?.focus();
         
-        // Mostrar notificación de éxito
-        if (window.location.search.includes('created=true')) {
-            setTimeout(() => {
-                alert('✅ Actividad registrada exitosamente!');
-            }, 100);
-        }
+        // Mostrar datos del formulario en consola para debug
+        document.querySelector('form[method="post"]')?.addEventListener('submit', function(e) {
+            const formData = new FormData(this);
+            console.log('Datos del formulario:', Object.fromEntries(formData));
+        });
     </script>
 }

@@ -1,20 +1,21 @@
 ﻿FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copiar archivos de proyecto
+# Copiar solo los archivos esenciales primero
 COPY *.csproj .
+COPY nuget.config .
 RUN dotnet restore
 
-# Copiar todo el código
+# Copiar el resto del código
 COPY . .
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet publish -c Release -o /app/publish --no-self-contained
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/publish .
 
-# Exponer puerto para Railway
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://0.0.0.0:8080
+ENV ASPNETCORE_ENVIRONMENT=Production
 
 ENTRYPOINT ["dotnet", "MongoDBReports.dll"]

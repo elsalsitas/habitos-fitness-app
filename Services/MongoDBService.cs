@@ -5,7 +5,7 @@ namespace MongoDBReports.Services
 {
     public class MongoDBService
     {
-        private readonly IMongoCollection<HabitoFitness> _habitosCollection;
+        private readonly IMongoCollection<HabitoFitness>? _habitosCollection;
         private readonly ILogger<MongoDBService> _logger;
 
         public MongoDBService(ILogger<MongoDBService> logger)
@@ -33,6 +33,8 @@ namespace MongoDBReports.Services
         {
             try 
             {
+                if (_habitosCollection == null) return;
+                
                 var count = await _habitosCollection.CountDocumentsAsync(FilterDefinition<HabitoFitness>.Empty);
                 if (count == 0)
                 {
@@ -62,30 +64,47 @@ namespace MongoDBReports.Services
         {
             try 
             {
+                if (_habitosCollection == null)
+                {
+                    _logger.LogWarning("Colección no disponible, devolviendo datos de ejemplo");
+                    return GetDatosEjemplo();
+                }
+                
                 return await _habitosCollection.Find(_ => true).ToListAsync();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error obteniendo hábitos");
-                return new List<HabitoFitness>
-                {
-                    new HabitoFitness { 
-                        Actividad = "Ejemplo - Conexión falló", 
-                        Tipo = "Cardio",
-                        DuracionMinutos = 30,
-                        CaloriasQuemadas = 300,
-                        Fecha = DateTime.UtcNow,
-                        Intensidad = "Moderada",
-                        Notas = "Datos de ejemplo por fallo de conexión"
-                    }
-                };
+                return GetDatosEjemplo();
             }
+        }
+
+        private List<HabitoFitness> GetDatosEjemplo()
+        {
+            return new List<HabitoFitness>
+            {
+                new HabitoFitness { 
+                    Actividad = "Ejemplo - Conexión falló", 
+                    Tipo = "Cardio",
+                    DuracionMinutos = 30,
+                    CaloriasQuemadas = 300,
+                    Fecha = DateTime.UtcNow,
+                    Intensidad = "Moderada",
+                    Notas = "Datos de ejemplo por fallo de conexión"
+                }
+            };
         }
 
         public async Task CreateHabitoAsync(HabitoFitness habito)
         {
             try 
             {
+                if (_habitosCollection == null)
+                {
+                    _logger.LogWarning("No se puede crear hábito - colección no disponible");
+                    throw new Exception("Servicio de base de datos no disponible");
+                }
+                
                 await _habitosCollection.InsertOneAsync(habito);
                 _logger.LogInformation("Hábito creado: {Actividad}", habito.Actividad);
             }
@@ -100,6 +119,12 @@ namespace MongoDBReports.Services
         {
             try 
             {
+                if (_habitosCollection == null)
+                {
+                    _logger.LogWarning("No se puede eliminar hábito - colección no disponible");
+                    throw new Exception("Servicio de base de datos no disponible");
+                }
+                
                 await _habitosCollection.DeleteOneAsync(x => x.Id == id);
                 _logger.LogInformation("Hábito eliminado: {Id}", id);
             }
